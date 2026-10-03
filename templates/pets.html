@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Browse Available Pets - Pet Adoption Portal{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2.5rem; padding-bottom: 4rem;">
+    <!-- Page Header -->
+    <div style="margin-bottom: 2rem;">
+        <h1 style="font-size: 2.4rem; margin-bottom: 0.5rem;">Adopt a Companion</h1>
+        <p style="color: var(--text-muted); font-size: 1.05rem;">Search and discover rescued pets ready to bring joy into your home.</p>
+    </div>
+
+    <!-- Filter & Search Bar -->
+    <div class="card" style="margin-bottom: 2.5rem; border-radius: var(--radius-xl); padding: 1.5rem;">
+        <form method="GET" action="{{ url_for('pets') }}" id="filter-form">
+            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 1rem; align-items: end;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" for="search-input"><i class="fas fa-search"></i> Search by Name or Breed</label>
+                    <input type="text" name="q" id="search-input" class="form-control" placeholder="e.g. Buddy, Golden Retriever..." value="{{ search_query }}">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" for="category-select"><i class="fas fa-filter"></i> Category</label>
+                    <select name="category" id="category-select" class="form-control">
+                        <option value="">All Categories</option>
+                        {% for cat in categories %}
+                            <option value="{{ cat.category_id }}" {% if selected_category|string == cat.category_id|string %}selected{% endif %}>
+                                {{ cat.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" for="gender-select"><i class="fas fa-venus-mars"></i> Gender</label>
+                    <select name="gender" id="gender-select" class="form-control">
+                        <option value="">All Genders</option>
+                        <option value="Male" {% if selected_gender == 'Male' %}selected{% endif %}>Male</option>
+                        <option value="Female" {% if selected_gender == 'Female' %}selected{% endif %}>Female</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" for="status-select"><i class="fas fa-tag"></i> Status</label>
+                    <select name="status" id="status-select" class="form-control">
+                        <option value="">All Statuses</option>
+                        <option value="Available" {% if selected_status == 'Available' %}selected{% endif %}>Available</option>
+                        <option value="Pending" {% if selected_status == 'Pending' %}selected{% endif %}>Pending</option>
+                        <option value="Adopted" {% if selected_status == 'Adopted' %}selected{% endif %}>Adopted</option>
+                    </select>
+                </div>
+
+                <div>
+                    <button type="submit" class="btn btn-primary" id="btn-apply-filter" style="height: 44px; width: 100%;">
+                        Filter
+                    </button>
+                </div>
+            </div>
+
+            {% if search_query or selected_category or selected_gender or selected_status %}
+                <div style="margin-top: 1rem; display: flex; align-items: center; gap: 0.75rem; font-size: 0.875rem;">
+                    <span style="color: var(--text-muted);">Active filters:</span>
+                    <a href="{{ url_for('pets') }}" class="btn btn-secondary btn-sm" style="border-radius: var(--radius-full);"><i class="fas fa-times"></i> Reset Filters</a>
+                </div>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Pet Grid -->
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+        <div style="font-weight: 700; color: var(--text-muted); font-size: 0.95rem;">
+            Showing <span style="color: var(--primary);">{{ pets|length }}</span> pet{% if pets|length != 1 %}s{% endif %}
+        </div>
+        {% if session_role in ['admin', 'staff'] %}
+            <a href="{{ url_for('add_pet') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add New Pet</a>
+        {% endif %}
+    </div>
+
+    {% if pets %}
+        <div class="grid grid-cols-3" id="pets-grid">
+            {% for pet in pets %}
+                <div class="pet-card">
+                    <div class="pet-card-image">
+                        <img src="{{ pet.image_path }}" alt="{{ pet.name }}">
+                        <span class="pet-badge-status badge-{{ pet.status|lower }}">
+                            {{ pet.status }}
+                        </span>
+                    </div>
+                    <div class="pet-card-body">
+                        <div class="pet-category-tag">{{ pet.category_name }}</div>
+                        <h3 class="pet-name">{{ pet.name }}</h3>
+                        <div class="pet-breed">{{ pet.breed }}</div>
+
+                        <div class="pet-specs">
+                            <span class="spec-pill"><i class="fas fa-birthday-cake"></i> {{ pet.age }}</span>
+                            <span class="spec-pill"><i class="fas {% if pet.gender == 'Male' %}fa-mars{% else %}fa-venus{% endif %}"></i> {{ pet.gender }}</span>
+                            <span class="spec-pill" style="color: var(--success);"><i class="fas fa-shield-virus"></i> Health Checked</span>
+                        </div>
+
+                        <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem; line-height: 1.5;">
+                            {{ pet.description[:110] }}{% if pet.description|length > 110 %}...{% endif %}
+                        </p>
+
+                        <div class="pet-card-footer">
+                            <div class="pet-fee">
+                                <span>Adoption Fee</span>
+                                ₹{{ "{:,.0f}".format(pet.adoption_fee) }}
+                            </div>
+                            <a href="{{ url_for('pet_detail', pet_id=pet.pet_id) }}" class="btn btn-primary btn-sm" id="pet-view-{{ pet.pet_id }}">
+                                Details & Apply <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card" style="text-align: center; padding: 4rem 2rem;">
+            <div style="font-size: 3rem; color: var(--text-light); margin-bottom: 1rem;">
+                <i class="fas fa-search"></i>
+            </div>
+            <h3>No pets found matching your criteria</h3>
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Try adjusting your search terms or clearing your category filters.</p>
+            <a href="{{ url_for('pets') }}" class="btn btn-primary">Clear All Filters</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

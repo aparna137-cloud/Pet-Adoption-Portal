@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}Adoption Application for {{ pet.name }} - Pet Adoption Portal{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2.5rem; padding-bottom: 4rem; max-width: 900px;">
+    <div style="margin-bottom: 2rem;">
+        <h1 style="font-size: 2.2rem; margin-bottom: 0.5rem;">Adoption Application</h1>
+        <p style="color: var(--text-muted); font-size: 1.05rem;">
+            Please complete this questionnaire to help our shelter team ensure the best match for {{ pet.name }}.
+        </p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 300px 1fr; gap: 2rem; align-items: start;">
+        <!-- Left: Pet Summary Card -->
+        <div class="card" style="border-radius: var(--radius-xl); overflow: hidden; padding: 0;">
+            <img src="{{ pet.image_path }}" alt="{{ pet.name }}" style="width: 100%; height: 200px; object-fit: cover;">
+            <div style="padding: 1.5rem;">
+                <h3 style="font-size: 1.35rem; margin-bottom: 0.25rem;">{{ pet.name }}</h3>
+                <div style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">{{ pet.breed }} ({{ pet.age }})</div>
+                <div style="border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">Standard Adoption Fee</div>
+                    <div style="font-size: 1.5rem; font-weight: 800; color: var(--primary);">₹{{ "{:,.0f}".format(pet.adoption_fee) }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Application Form -->
+        <div class="card" style="border-radius: var(--radius-xl); padding: 2rem;">
+            <div id="adopt-error" style="display: none; margin-bottom: 1.25rem;"></div>
+
+            <form method="POST" action="{{ url_for('submit_adoption_request', pet_id=pet.pet_id) }}" id="adopt-request-form">
+                <!-- Applicant Name & Email Display -->
+                <div class="form-group">
+                    <label class="form-label">Applicant Name</label>
+                    <input type="text" class="form-control" value="{{ session_user }}" disabled style="background: #f1f5f9;">
+                </div>
+
+                <!-- Monthly Income (FR-04, SEL-07, BUG-001) -->
+                <div class="form-group">
+                    <label class="form-label" for="applicant-income">
+                        Monthly Income (₹ INR) <span style="color: #ef4444;">*</span>
+                    </label>
+                    <input type="number" name="applicant_income" id="applicant-income" class="form-control" placeholder="e.g. 45000" min="0" step="100" required>
+                    <small style="color: var(--text-muted); font-size: 0.8rem;">
+                        Note: Validation requires an amount greater than or equal to 0 (Negative amounts are rejected per BUG-001 fix).
+                    </small>
+                </div>
+
+                <!-- Household Type -->
+                <div class="form-group">
+                    <label class="form-label" for="household-type">Household / Residence Type</label>
+                    <select name="household_type" id="household-type" class="form-control">
+                        <option value="Independent House / Villa with Garden">Independent House / Villa with Garden</option>
+                        <option value="Apartment / Flat (2BHK / 3BHK)">Apartment / Flat (2BHK / 3BHK)</option>
+                        <option value="Farmhouse or Countryside Estate">Farmhouse or Countryside Estate</option>
+                        <option value="Rented Apartment with Pet Permission">Rented Apartment with Pet Permission</option>
+                    </select>
+                </div>
+
+                <!-- Existing Pets -->
+                <div class="form-group">
+                    <label class="form-label" style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                        <input type="checkbox" name="has_other_pets" value="1" id="has-other-pets" style="width: 18px; height: 18px;">
+                        <span>Do you currently have other companion animals in your home?</span>
+                    </label>
+                </div>
+
+                <!-- Motivation Message -->
+                <div class="form-group">
+                    <label class="form-label" for="adopt-message">
+                        Why do you want to adopt {{ pet.name }}? <span style="color: #ef4444;">*</span>
+                    </label>
+                    <textarea name="message" id="adopt-message" class="form-control" rows="4" placeholder="Tell us about your daily schedule, past experience with pets, and the care you can provide..." required></textarea>
+                </div>
+
+                <div style="display: flex; align-items: center; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
+                    <a href="{{ url_for('pet_detail', pet_id=pet.pet_id) }}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary btn-lg" id="btn-submit-request">
+                        <i class="fas fa-paper-plane"></i> Submit Adoption Request
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

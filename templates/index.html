@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+
+{% block title %}Pet Adoption Portal - Find Your Forever Friend{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero" id="home-hero">
+    <div class="container">
+        <div class="hero-grid">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <i class="fas fa-heart" style="color: #ef4444;"></i> Give a Rescued Animal a Second Chance
+                </div>
+                <h1 class="hero-title">
+                    Every Pet Deserves a <span class="gradient-text">Loving Forever Home</span>
+                </h1>
+                <p class="hero-desc">
+                    Connect with rescue shelters, view comprehensive medical and vaccination records, and submit verified adoption applications effortlessly through our transparent portal.
+                </p>
+                <div class="hero-actions">
+                    <a href="{{ url_for('pets') }}" class="btn btn-primary btn-lg" id="btn-browse-pets">
+                        <i class="fas fa-paw"></i> Find Pets to Adopt
+                    </a>
+                    <a href="{{ url_for('income') }}" class="btn btn-outline btn-lg" id="btn-view-financials">
+                        <i class="fas fa-hand-holding-heart"></i> Donate & Transparency
+                    </a>
+                </div>
+            </div>
+            <div class="hero-image-wrap">
+                <img src="{{ url_for('static', filename='images/hero_pet_banner.jpg') }}" alt="Rescued Pets Ready for Adoption" id="hero-img">
+                <div class="hero-image-badge">
+                    <div class="badge-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div>
+                        <div style="font-weight: 700; font-size: 0.95rem;">100% Health Checked</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">Vaccinated & Shelter Verified</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Overview Statistics Banner (FR-04, FR-05) -->
+<div class="container">
+    <div class="stats-banner" id="stats-overview">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-num" id="stat-available">{{ available_count }}</div>
+                <div class="stat-label">Pets Waiting for Love</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num" id="stat-adopted">{{ adopted_count }}</div>
+                <div class="stat-label">Happy Adoptions</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num" id="stat-requests">{{ requests_count }}</div>
+                <div class="stat-label">Total Adoption Requests</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num" id="stat-funds">₹{{ "{:,.0f}".format(funds_count) }}</div>
+                <div class="stat-label">Funds & Care Raised</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Explore Categories -->
+<section style="padding: 2rem 0 3.5rem;">
+    <div class="container">
+        <div style="text-align: center; margin-bottom: 2.5rem;">
+            <h2 style="font-size: 2.2rem; margin-bottom: 0.5rem;">Explore by Category</h2>
+            <p style="color: var(--text-muted); font-size: 1.05rem;">Find the companion that fits your home, personality, and lifestyle</p>
+        </div>
+
+        <div class="grid grid-cols-4">
+            {% for cat in nav_categories %}
+                <a href="{{ url_for('pets', category=cat.category_id) }}" class="card" style="text-align: center; padding: 2rem 1.5rem; text-decoration: none; border-radius: var(--radius-xl); transition: transform 0.25s ease;">
+                    <div style="width: 64px; height: 64px; background: var(--primary-subtle); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; font-size: 1.75rem;">
+                        <i class="fas {{ cat.icon }}"></i>
+                    </div>
+                    <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem; color: var(--text-main);">{{ cat.name }}</h3>
+                    <p style="font-size: 0.875rem; color: var(--text-muted); line-height: 1.5;">{{ cat.description }}</p>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Featured Pets Section -->
+<section style="background: #ffffff; padding: 4.5rem 0; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
+    <div class="container">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2.5rem; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h2 style="font-size: 2.2rem; margin-bottom: 0.5rem;">Featured Companions</h2>
+                <p style="color: var(--text-muted); font-size: 1.05rem;">These lovely pets are looking for their forever families today</p>
+            </div>
+            <a href="{{ url_for('pets') }}" class="btn btn-outline" id="btn-see-all-pets">
+                View All Pets <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-3">
+            {% for pet in featured_pets %}
+                <div class="pet-card">
+                    <div class="pet-card-image">
+                        <img src="{{ pet.image_path }}" alt="{{ pet.name }}">
+                        <span class="pet-badge-status badge-{{ pet.status|lower }}">
+                            {{ pet.status }}
+                        </span>
+                    </div>
+                    <div class="pet-card-body">
+                        <div class="pet-category-tag">{{ pet.category_name }}</div>
+                        <h3 class="pet-name">{{ pet.name }}</h3>
+                        <div class="pet-breed">{{ pet.breed }}</div>
+
+                        <div class="pet-specs">
+                            <span class="spec-pill"><i class="fas fa-birthday-cake"></i> {{ pet.age }}</span>
+                            <span class="spec-pill"><i class="fas {% if pet.gender == 'Male' %}fa-mars{% else %}fa-venus{% endif %}"></i> {{ pet.gender }}</span>
+                            <span class="spec-pill" style="color: var(--success);"><i class="fas fa-shield-virus"></i> Checked</span>
+                        </div>
+
+                        <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem; line-height: 1.5;">
+                            {{ pet.description[:100] }}...
+                        </p>
+
+                        <div class="pet-card-footer">
+                            <div class="pet-fee">
+                                <span>Adoption Fee</span>
+                                ₹{{ "{:,.0f}".format(pet.adoption_fee) }}
+                            </div>
+                            <a href="{{ url_for('pet_detail', pet_id=pet.pet_id) }}" class="btn btn-primary btn-sm">
+                                View Profile <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Adoption Process (UML Activity Diagram representation - Fig 3.3) -->
+<section style="padding: 4.5rem 0;">
+    <div class="container">
+        <div style="text-align: center; max-width: 700px; margin: 0 auto 3.5rem;">
+            <h2 style="font-size: 2.2rem; margin-bottom: 0.75rem;">How Adoption Works</h2>
+            <p style="color: var(--text-muted); font-size: 1.05rem;">Our 4-step verified workflow ensures every pet is placed in a safe, loving environment.</p>
+        </div>
+
+        <div class="grid grid-cols-4" style="position: relative;">
+            <div class="card" style="border-radius: var(--radius-xl); text-align: center; padding: 2rem 1.5rem;">
+                <div style="width: 50px; height: 50px; background: var(--primary); color: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; font-weight: 800; font-size: 1.25rem;">1</div>
+                <h4 style="margin-bottom: 0.5rem;">Browse & Discover</h4>
+                <p style="font-size: 0.875rem; color: var(--text-muted);">Explore verified profiles, photos, breed descriptions, and medical records.</p>
+            </div>
+            <div class="card" style="border-radius: var(--radius-xl); text-align: center; padding: 2rem 1.5rem;">
+                <div style="width: 50px; height: 50px; background: var(--accent); color: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; font-weight: 800; font-size: 1.25rem;">2</div>
+                <h4 style="margin-bottom: 0.5rem;">Submit Request</h4>
+                <p style="font-size: 0.875rem; color: var(--text-muted);">Fill the adoption application with your home details, income, and background.</p>
+            </div>
+            <div class="card" style="border-radius: var(--radius-xl); text-align: center; padding: 2rem 1.5rem;">
+                <div style="width: 50px; height: 50px; background: var(--info); color: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; font-weight: 800; font-size: 1.25rem;">3</div>
+                <h4 style="margin-bottom: 0.5rem;">Shelter Review</h4>
+                <p style="font-size: 0.875rem; color: var(--text-muted);">NGO shelter staff reviews your application and arranges a meet-and-greet.</p>
+            </div>
+            <div class="card" style="border-radius: var(--radius-xl); text-align: center; padding: 2rem 1.5rem;">
+                <div style="width: 50px; height: 50px; background: var(--success); color: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; font-weight: 800; font-size: 1.25rem;">4</div>
+                <h4 style="margin-bottom: 0.5rem;">Welcome Home!</h4>
+                <p style="font-size: 0.875rem; color: var(--text-muted);">Finalize adoption papers, pay standard shelter care fees, and welcome your companion.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Adopter Testimonials & Reviews -->
+<section style="background: #ffffff; padding: 4.5rem 0; border-top: 1px solid var(--border-color);">
+    <div class="container">
+        <div style="text-align: center; margin-bottom: 3rem;">
+            <h2 style="font-size: 2.2rem; margin-bottom: 0.5rem;">Success Stories</h2>
+            <p style="color: var(--text-muted); font-size: 1.05rem;">Real experiences from adopters across Maharashtra</p>
+        </div>
+
+        <div class="grid grid-cols-3">
+            {% for review in reviews %}
+                <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="color: #f59e0b; margin-bottom: 0.75rem;">
+                            {% for i in range(review.rating) %}
+                                <i class="fas fa-star"></i>
+                            {% endfor %}
+                            {% for i in range(5 - review.rating) %}
+                                <i class="far fa-star"></i>
+                            {% endfor %}
+                        </div>
+                        <p style="font-size: 0.95rem; color: var(--text-main); font-style: italic; margin-bottom: 1.25rem; line-height: 1.6;">
+                            "{{ review.comment }}"
+                        </p>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.75rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                        <div style="width: 40px; height: 40px; background: var(--primary-subtle); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700;">
+                            {{ review.user_name[0] }}
+                        </div>
+                        <div>
+                            <div style="font-weight: 700; font-size: 0.9rem;">{{ review.user_name }}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">Adopted {{ review.pet_name }}</div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

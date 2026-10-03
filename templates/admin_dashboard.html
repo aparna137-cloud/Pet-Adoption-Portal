@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block title %}Administrative Dashboard - Pet Adoption Portal{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2.5rem; padding-bottom: 4rem;">
+    <!-- Dashboard Header -->
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h1 style="font-size: 2.2rem; margin-bottom: 0.35rem;" id="dashboard-title">Administrative Dashboard</h1>
+            <p style="color: var(--text-muted); font-size: 1.05rem;">
+                Logged in as <strong>{{ session_user }}</strong> (<span class="role-badge {{ session_role }}">{{ session_role }}</span>)
+            </p>
+        </div>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+            <a href="{{ url_for('add_pet') }}" class="btn btn-primary" id="btn-add-pet-dash">
+                <i class="fas fa-plus"></i> Add New Pet
+            </a>
+            {% if session_role == 'admin' %}
+                <a href="{{ url_for('manage_categories') }}" class="btn btn-outline">
+                    <i class="fas fa-folder"></i> Categories
+                </a>
+                <a href="{{ url_for('manage_users') }}" class="btn btn-outline">
+                    <i class="fas fa-users-cog"></i> Users
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Quick Stat Cards -->
+    <div class="grid grid-cols-4" style="margin-bottom: 2.5rem;">
+        <div class="card" style="border-radius: var(--radius-xl); padding: 1.5rem;">
+            <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Total Animals</div>
+            <div style="font-size: 2rem; font-weight: 800; color: var(--primary); margin: 0.25rem 0;" id="dash-total-pets">{{ total_pets }}</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">Active in catalog</div>
+        </div>
+
+        <div class="card" style="border-radius: var(--radius-xl); padding: 1.5rem;">
+            <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Pending Applications</div>
+            <div style="font-size: 2rem; font-weight: 800; color: var(--warning); margin: 0.25rem 0;" id="dash-pending-reqs">{{ pending_requests }}</div>
+            <a href="{{ url_for('manage_requests', status='Pending') }}" style="font-size: 0.8rem; font-weight: 600;">
+                Review pending &rarr;
+            </a>
+        </div>
+
+        <div class="card" style="border-radius: var(--radius-xl); padding: 1.5rem;">
+            <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Registered Adopters</div>
+            <div style="font-size: 2rem; font-weight: 800; color: var(--info); margin: 0.25rem 0;">{{ total_adopters }}</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">Verified user accounts</div>
+        </div>
+
+        <div class="card" style="border-radius: var(--radius-xl); padding: 1.5rem;">
+            <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Shelter Revenue</div>
+            <div style="font-size: 2rem; font-weight: 800; color: var(--success); margin: 0.25rem 0;">₹{{ "{:,.0f}".format(total_income) }}</div>
+            <a href="{{ url_for('income') }}" style="font-size: 0.8rem; font-weight: 600; color: var(--success);">
+                View transactions &rarr;
+            </a>
+        </div>
+    </div>
+
+    <!-- Pet Listings Inventory Table (FR-02) -->
+    <div class="card" style="border-radius: var(--radius-xl); padding: 1.75rem; margin-bottom: 2.5rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h2 style="font-size: 1.5rem;"><i class="fas fa-paw" style="color: var(--primary);"></i> Animal Inventory & Profiles</h2>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Add, edit, view health records, or update adoption status.</p>
+            </div>
+            <a href="{{ url_for('add_pet') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add Pet Record</a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table" id="admin-pets-table">
+                <thead>
+                    <tr>
+                        <th>Pet</th>
+                        <th>Category</th>
+                        <th>Breed</th>
+                        <th>Age / Gender</th>
+                        <th>Care Fee</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pet in pets %}
+                        <tr>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    <img src="{{ pet.image_path }}" alt="{{ pet.name }}" style="width: 48px; height: 48px; object-fit: cover; border-radius: var(--radius-sm);">
+                                    <div style="font-weight: 700; color: var(--text-main);">{{ pet.name }}</div>
+                                </div>
+                            </td>
+                            <td>{{ pet.category_name }}</td>
+                            <td>{{ pet.breed }}</td>
+                            <td>{{ pet.age }} / {{ pet.gender }}</td>
+                            <td style="font-weight: 700;">₹{{ "{:,.0f}".format(pet.adoption_fee) }}</td>
+                            <td>
+                                <span class="pet-badge-status badge-{{ pet.status|lower }}" style="position: static; font-size: 0.8rem;">
+                                    {{ pet.status }}
+                                </span>
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 0.4rem;">
+                                    <a href="{{ url_for('pet_detail', pet_id=pet.pet_id) }}" class="btn btn-outline btn-sm" title="View Profile">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ url_for('edit_pet', pet_id=pet.pet_id) }}" class="btn btn-secondary btn-sm" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="POST" action="{{ url_for('delete_pet', pet_id=pet.pet_id) }}" onsubmit="return confirm('Delete pet record for {{ pet.name }}?');" style="display: inline;">
+                                        <button type="submit" class="btn btn-outline btn-sm" style="color: var(--danger); border-color: #fecaca;" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Recent Adoption Requests -->
+    <div class="card" style="border-radius: var(--radius-xl); padding: 1.75rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+            <h2 style="font-size: 1.5rem;"><i class="fas fa-clipboard-list" style="color: var(--accent);"></i> Recent Applications</h2>
+            <a href="{{ url_for('manage_requests') }}" class="btn btn-outline btn-sm">View All Requests</a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Req #</th>
+                        <th>Applicant</th>
+                        <th>Pet</th>
+                        <th>Applied Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in recent_requests %}
+                        <tr>
+                            <td style="font-weight: 700;">#{{ req.request_id }}</td>
+                            <td style="font-weight: 600;">{{ req.user_name }}</td>
+                            <td>{{ req.pet_name }} ({{ req.breed }})</td>
+                            <td>{{ req.request_date[:10] }}</td>
+                            <td>
+                                <span class="pet-badge-status badge-{{ req.status|lower }}" style="position: static; font-size: 0.8rem;">
+                                    {{ req.status }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('manage_requests') }}" class="btn btn-outline btn-sm">Review</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

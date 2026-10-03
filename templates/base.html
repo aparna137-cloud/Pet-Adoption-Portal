@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Pet Adoption Portal{% endblock %} | GPP CM41206</title>
+    <meta name="description" content="Pet Adoption Portal - Connecting Loving Families with Pets in Need. Academic Project for Government Polytechnic Pune.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <!-- Main Navigation Bar -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="brand" id="nav-brand">
+                <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="Pet Adoption Portal Logo">
+                <span>Pet<span class="highlight">Adopt</span></span>
+            </a>
+
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="{{ url_for('pets') }}" class="nav-link {% if request.endpoint == 'pets' %}active{% endif %}"><i class="fas fa-paw"></i> Browse Pets</a></li>
+                    {% if session_user %}
+                        {% if session_role in ['admin', 'staff'] %}
+                            <li><a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}"><i class="fas fa-chart-pie"></i> Dashboard</a></li>
+                            <li><a href="{{ url_for('manage_requests') }}" class="nav-link {% if request.endpoint == 'manage_requests' %}active{% endif %}"><i class="fas fa-clipboard-check"></i> Requests</a></li>
+                        {% else %}
+                            <li><a href="{{ url_for('my_requests') }}" class="nav-link {% if request.endpoint == 'my_requests' %}active{% endif %}"><i class="fas fa-heart"></i> My Requests</a></li>
+                        {% endif %}
+                        <li><a href="{{ url_for('income') }}" class="nav-link {% if request.endpoint == 'income' %}active{% endif %}"><i class="fas fa-coins"></i> Income & Fees</a></li>
+                        <li><a href="{{ url_for('reports') }}" class="nav-link {% if request.endpoint == 'reports' %}active{% endif %}"><i class="fas fa-chart-line"></i> Reports</a></li>
+                    {% else %}
+                        <li><a href="{{ url_for('income') }}" class="nav-link {% if request.endpoint == 'income' %}active{% endif %}"><i class="fas fa-coins"></i> Financials</a></li>
+                    {% endif %}
+                    <li><a href="{{ url_for('defect_report') }}" class="nav-link {% if request.endpoint == 'defect_report' %}active{% endif %}"><i class="fas fa-bug"></i> Defect / STLC</a></li>
+                </ul>
+            </nav>
+
+            <div class="nav-auth">
+                {% if session_user %}
+                    <span class="role-badge {{ session_role }}">{{ session_role }}</span>
+                    <span style="font-weight: 600; font-size: 0.9rem; color: var(--text-main); margin-right: 0.25rem;">
+                        <i class="far fa-user-circle"></i> {{ session_user.split(' ')[0] }}
+                    </span>
+                    <a href="{{ url_for('logout') }}" id="logout-btn" class="btn btn-outline btn-sm"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" id="nav-login-btn" class="btn btn-outline btn-sm"><i class="fas fa-sign-in-alt"></i> Login</a>
+                    <a href="{{ url_for('register') }}" id="nav-register-btn" class="btn btn-primary btn-sm"><i class="fas fa-user-plus"></i> Register</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Flash Alert Messages -->
+    <div class="flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}" role="alert">
+                        <span>
+                            {% if category == 'success' %}<i class="fas fa-check-circle"></i>
+                            {% elif category == 'danger' %}<i class="fas fa-exclamation-triangle"></i>
+                            {% elif category == 'warning' %}<i class="fas fa-exclamation-circle"></i>
+                            {% else %}<i class="fas fa-info-circle"></i>{% endif %}
+                            {{ message }}
+                        </span>
+                        <button type="button" class="alert-close" aria-label="Close">&times;</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Page Content -->
+    <main style="flex: 1;">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <h3>🐾 Pet Adoption Portal</h3>
+                    <p>A comprehensive academic software engineering project connecting shelter pets with loving forever homes. Providing pet profile discovery, medical tracking, adoption workflow, financial income monitoring, and STLC defect management.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Quick Navigation</h4>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('index') }}">Home</a></li>
+                        <li><a href="{{ url_for('pets') }}">Adopt a Pet</a></li>
+                        <li><a href="{{ url_for('income') }}">Shelter Income & Fees</a></li>
+                        <li><a href="{{ url_for('reports') }}">Analytics & Reports</a></li>
+                        <li><a href="{{ url_for('defect_report') }}">Defect Report (BUG-001)</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Pet Categories</h4>
+                    <ul class="footer-links">
+                        {% for cat in nav_categories %}
+                            <li><a href="{{ url_for('pets', category=cat.category_id) }}"><i class="fas {{ cat.icon }}"></i> {{ cat.name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <div class="footer-academic-card">
+                        <h5>Government Polytechnic, Pune</h5>
+                        <p><strong>Department:</strong> Computer Engineering</p>
+                        <p><strong>Course:</strong> Software Engineering and Testing (CM41206)</p>
+                        <p><strong>Submitted by:</strong> Aparna S. Bhokare (2406026) & Anisha R. Todkar (2406004)</p>
+                        <p><strong>Guide:</strong> Smt. Anita Kshirsagar / Anita Ambilpure</p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div>&copy; {{ current_year }} Pet Adoption Portal. Developed under GP Pune Academic Guidelines.</div>
+                <div>Automated Selenium & JMeter Test Suite Enabled.</div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

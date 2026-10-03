@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}My Adoption Requests - Pet Adoption Portal{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2.5rem; padding-bottom: 4rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h1 style="font-size: 2.2rem; margin-bottom: 0.5rem;">My Adoption Applications</h1>
+            <p style="color: var(--text-muted); font-size: 1.05rem;">Track the status and shelter decisions for your submitted requests.</p>
+        </div>
+        <a href="{{ url_for('pets') }}" class="btn btn-primary">
+            <i class="fas fa-paw"></i> Browse More Pets
+        </a>
+    </div>
+
+    {% if requests %}
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            {% for req in requests %}
+                <div class="card" style="border-radius: var(--radius-xl); padding: 1.75rem;">
+                    <div style="display: grid; grid-template-columns: 140px 1fr auto; gap: 1.5rem; align-items: center;">
+                        <img src="{{ req.image_path }}" alt="{{ req.pet_name }}" style="width: 140px; height: 110px; object-fit: cover; border-radius: var(--radius-lg);">
+                        
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.35rem;">
+                                <h3 style="font-size: 1.35rem; margin-bottom: 0;">{{ req.pet_name }}</h3>
+                                <span class="role-badge" style="background: var(--bg-surface); color: var(--text-muted);">{{ req.category_name }}</span>
+                            </div>
+                            <div style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">
+                                {{ req.breed }} &bull; Standard Care Fee: ₹{{ "{:,.0f}".format(req.adoption_fee) }}
+                            </div>
+                            <div style="font-size: 0.85rem; color: var(--text-light);">
+                                <i class="far fa-calendar-alt"></i> Applied on {{ req.request_date }}
+                            </div>
+                            {% if req.notes %}
+                                <div style="margin-top: 0.75rem; background: var(--bg-surface); padding: 0.6rem 0.85rem; border-radius: var(--radius-sm); font-size: 0.85rem;">
+                                    <strong>Shelter Update:</strong> {{ req.notes }}
+                                </div>
+                            {% endif %}
+                            {% if req.rejection_reason %}
+                                <div style="margin-top: 0.75rem; background: var(--danger-subtle); color: #991b1b; padding: 0.6rem 0.85rem; border-radius: var(--radius-sm); font-size: 0.85rem;">
+                                    <strong>Reason:</strong> {{ req.rejection_reason }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div style="text-align: right;">
+                            <span class="pet-badge-status badge-{{ req.status|lower }}" style="display: inline-block; position: static; font-size: 0.9rem; padding: 0.45rem 1.15rem; margin-bottom: 0.75rem;">
+                                {{ req.status }}
+                            </span>
+                            <div>
+                                <a href="{{ url_for('pet_detail', pet_id=req.pet_id) }}" class="btn btn-outline btn-sm">
+                                    View Pet Profile
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card" style="text-align: center; padding: 4rem 2rem; border-radius: var(--radius-xl);">
+            <div style="font-size: 3rem; color: var(--text-light); margin-bottom: 1rem;">
+                <i class="fas fa-clipboard-list"></i>
+            </div>
+            <h3>You haven't submitted any adoption requests yet</h3>
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Find a pet you love and submit an application to start the adoption process.</p>
+            <a href="{{ url_for('pets') }}" class="btn btn-primary"><i class="fas fa-paw"></i> Browse Available Pets</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

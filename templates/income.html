@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+
+{% block title %}Income & Financial Management - Pet Adoption Portal{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2.5rem; padding-bottom: 4rem;">
+    <!-- Page Header -->
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h1 style="font-size: 2.2rem; margin-bottom: 0.5rem;" id="page-title">Shelter Financials & Income Tracking</h1>
+            <p style="color: var(--text-muted); font-size: 1.05rem;">
+                Monitoring adoption fees, donations, total requests, and available balance (CM41206 FR-04).
+            </p>
+        </div>
+        <div style="display: flex; gap: 0.75rem;">
+            <a href="{{ url_for('export_csv', dataset='income') }}" class="btn btn-outline" id="btn-export-income">
+                <i class="fas fa-file-csv"></i> Export CSV
+            </a>
+            <button type="button" class="btn btn-primary" id="btn-open-add-income" onclick="openModal('add-income-modal')">
+                <i class="fas fa-plus-circle"></i> Add Income / Donation
+            </button>
+        </div>
+    </div>
+
+    <!-- Financial KPI Metrics (FR-04: Calculate income, adoption requests and balance) -->
+    <div class="grid grid-cols-4" style="margin-bottom: 2.5rem;" id="financial-metrics">
+        <div class="card" style="border-radius: var(--radius-xl); padding: 1.5rem; border-left: 4px solid var(--primary);">
+            <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Total Shelter Income</div>
+            <div style="font-size: 2rem; font-weight: 800; color: var(--primary); font-family: 'Outfit', sans-serif; margin: 0.35rem 0;" id="metric-total-income">
+                ₹{{ "{:,.2f}".format(total_income) }}
+            </div>
+            <div style="font-size: 0.8rem; color: var(--success); font-weight: 600;">
+                <i class="fas fa-arrow-up"></i> Cumulative verified receipts
+            </div>
+        </div>
+
+        <div class="card" style="border-radius: var(--radius-xl); padding: 1.5rem; border-left: 4px solid var(--accent);">
+            <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Total Adoption Requests</div>
+            <div style="font-size: 2rem; font-weight: 800; color: var(--accent); font-family: 'Outfit', sans-serif; margin: 0.35rem 0;" id="metric-total-requests">
+                {{ total_requests }}
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">
+                Applications processed to date
+            </div>
+        </div>
+
+        <div class="card" style="border-radius: var(--radius-xl); padding: 1.5rem; border-left: 4px solid var(--success);">
+            <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Current Reserve Balance</div>
+            <div style="font-size: 2rem; font-weight: 800; color: var(--success); font-family: 'Outfit', sans-serif; margin: 0.35rem 0;" id="metric-balance">
+                ₹{{ "{:,.2f}".format(balance) }}
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">
+                Available for veterinary care
+            </div>
+        </div>
+
+        <div class="card" style="border-radius: var(--radius-xl); padding: 1.5rem; border-left: 4px solid var(--info);">
+            <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Adoption Fees vs Grants</div>
+            <div style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin: 0.4rem 0;">
+                Fees: ₹{{ "{:,.0f}".format(total_fees) }}
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">
+                Donations: ₹{{ "{:,.0f}".format(total_donations) }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Income Records Table (SEL-05: Record saved) -->
+    <div class="card" style="border-radius: var(--radius-xl); padding: 1.75rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+            <h2 style="font-size: 1.5rem;"><i class="fas fa-receipt" style="color: var(--primary);"></i> Verified Transaction Registry</h2>
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Total {{ incomes|length }} transactions recorded</span>
+        </div>
+
+        {% if incomes %}
+            <div class="table-responsive">
+                <table class="table" id="incomes-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Date</th>
+                            <th>Category</th>
+                            <th>Description</th>
+                            <th>Payment Method</th>
+                            <th>Amount (₹)</th>
+                            {% if session_role in ['admin', 'staff'] %}
+                                <th>Action</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for inc in incomes %}
+                            <tr>
+                                <td style="font-weight: 700;">#{{ inc.income_id }}</td>
+                                <td style="font-weight: 600;">{{ inc.date }}</td>
+                                <td>
+                                    <span class="role-badge" style="background: var(--primary-subtle); color: var(--primary); border: 1px solid #c7d2fe;">
+                                        {{ inc.category }}
+                                    </span>
+                                </td>
+                                <td style="color: var(--text-main);">{{ inc.description or 'Shelter support contribution' }}</td>
+                                <td style="color: var(--text-muted); font-size: 0.85rem;">{{ inc.payment_method }}</td>
+                                <td style="font-weight: 800; color: var(--success); font-family: 'Outfit', sans-serif; font-size: 1.05rem;">
+                                    +₹{{ "{:,.2f}".format(inc.amount) }}
+                                </td>
+                                {% if session_role in ['admin', 'staff'] %}
+                                    <td>
+                                        <form method="POST" action="{{ url_for('delete_income', income_id=inc.income_id) }}" onsubmit="return confirm('Delete this financial entry?');">
+                                            <button type="submit" class="btn btn-outline btn-sm" style="color: var(--danger); border-color: #fecaca;">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p style="text-align: center; color: var(--text-muted); padding: 2rem;">No financial records found.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal: Add Income / Donation (SEL-04, SEL-05, SEL-07, BUG-001) -->
+<div id="add-income-modal" class="modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); z-index: 2000; align-items: center; justify-content: center;">
+    <div class="card" style="width: 100%; max-width: 520px; border-radius: var(--radius-xl); padding: 2rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+            <h3 style="font-size: 1.4rem;">Record Income / Donation</h3>
+            <button type="button" onclick="closeModal('add-income-modal')" style="background: none; border: none; font-size: 1.25rem; cursor: pointer;">&times;</button>
+        </div>
+
+        <div id="income-error" style="display: none; margin-bottom: 1rem;"></div>
+
+        <form method="POST" action="{{ url_for('income') }}" id="income-form">
+            <!-- Category -->
+            <div class="form-group">
+                <label class="form-label" for="income-category">Income Category <span style="color: #ef4444;">*</span></label>
+                <select name="category" id="income-category" class="form-control" required>
+                    <option value="">-- Select Category --</option>
+                    <option value="Adoption Fee">Adoption Fee</option>
+                    <option value="Donation">Public Donation</option>
+                    <option value="Sponsorship">Veterinary Sponsorship</option>
+                    <option value="Fundraiser">Community Fundraiser</option>
+                    <option value="Merchandise">Shelter Merchandise / Care Kits</option>
+                </select>
+            </div>
+
+            <!-- Amount (Tested in SEL-04, SEL-05, SEL-07, BUG-001) -->
+            <div class="form-group">
+                <label class="form-label" for="income-amount">Amount (₹ INR) <span style="color: #ef4444;">*</span></label>
+                <input type="number" name="amount" id="income-amount" class="form-control" placeholder="e.g. 2500" step="any" min="0" required>
+                <small style="color: var(--text-muted); font-size: 0.8rem;">
+                    Negative values are strictly rejected per defect fix BUG-001 (Must be ≥ 0).
+                </small>
+            </div>
+
+            <!-- Date -->
+            <div class="form-group">
+                <label class="form-label" for="income-date">Transaction Date <span style="color: #ef4444;">*</span></label>
+                <input type="date" name="date" id="income-date" class="form-control" value="{{ today_date }}" required>
+            </div>
+
+            <!-- Payment Method -->
+            <div class="form-group">
+                <label class="form-label" for="income-payment">Payment Method</label>
+                <select name="payment_method" id="income-payment" class="form-control">
+                    <option value="UPI / Online">UPI / QR Code Transfer</option>
+                    <option value="Credit / Debit Card">Credit / Debit Card</option>
+                    <option value="Bank NetBanking">Direct Bank NEFT / RTGS</option>
+                    <option value="Cash Receipt">Cash Counter Receipt</option>
+                </select>
+            </div>
+
+            <!-- Description -->
+            <div class="form-group">
+                <label class="form-label" for="income-desc">Description / Reference</label>
+                <input type="text" name="description" id="income-desc" class="form-control" placeholder="e.g. Buddy adoption fee payment">
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.75rem;">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('add-income-modal')">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="btn-save-income">Save Income Record</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

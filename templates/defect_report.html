@@ -1,0 +1,235 @@
+{% extends 'base.html' %}
+
+{% block title %}Software Testing Life Cycle & Defect Report - Pet Adoption Portal{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2.5rem; padding-bottom: 4rem;">
+    <!-- Page Header -->
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h1 style="font-size: 2.2rem; margin-bottom: 0.5rem;" id="defect-page-title">STLC & Defect Tracking Dashboard</h1>
+            <p style="color: var(--text-muted); font-size: 1.05rem;">
+                Software Engineering and Testing (CM41206) - Section 12 Test Management & Defect Logging.
+            </p>
+        </div>
+        {% if session_user %}
+            <button type="button" class="btn btn-primary" onclick="openModal('log-defect-modal')">
+                <i class="fas fa-bug"></i> Log New Defect
+            </button>
+        {% endif %}
+    </div>
+
+    <!-- Section 12.4: STLC Pipeline Flow Visualizer -->
+    <div class="card" style="border-radius: var(--radius-xl); padding: 2rem; margin-bottom: 2.5rem; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);">
+        <h3 style="font-size: 1.35rem; margin-bottom: 1.25rem;">
+            <i class="fas fa-project-diagram" style="color: var(--primary);"></i> 12.4 Complete Software Testing Life Cycle (STLC)
+        </h3>
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
+            <div style="background: var(--primary-subtle); border: 1px solid #c7d2fe; padding: 0.75rem 1rem; border-radius: var(--radius-md); text-align: center; flex: 1; min-width: 120px;">
+                <div style="font-size: 0.75rem; font-weight: 700; color: var(--primary);">PHASE 1</div>
+                <div style="font-weight: 700; font-size: 0.85rem; color: var(--primary-dark);">Requirement Analysis</div>
+            </div>
+            <i class="fas fa-chevron-right" style="color: var(--text-light);"></i>
+            <div style="background: var(--primary-subtle); border: 1px solid #c7d2fe; padding: 0.75rem 1rem; border-radius: var(--radius-md); text-align: center; flex: 1; min-width: 120px;">
+                <div style="font-size: 0.75rem; font-weight: 700; color: var(--primary);">PHASE 2</div>
+                <div style="font-weight: 700; font-size: 0.85rem; color: var(--primary-dark);">Test Planning</div>
+            </div>
+            <i class="fas fa-chevron-right" style="color: var(--text-light);"></i>
+            <div style="background: var(--primary-subtle); border: 1px solid #c7d2fe; padding: 0.75rem 1rem; border-radius: var(--radius-md); text-align: center; flex: 1; min-width: 120px;">
+                <div style="font-size: 0.75rem; font-weight: 700; color: var(--primary);">PHASE 3</div>
+                <div style="font-weight: 700; font-size: 0.85rem; color: var(--primary-dark);">Test Design</div>
+            </div>
+            <i class="fas fa-chevron-right" style="color: var(--text-light);"></i>
+            <div style="background: var(--accent-subtle); border: 1px solid #fed7aa; padding: 0.75rem 1rem; border-radius: var(--radius-md); text-align: center; flex: 1; min-width: 120px;">
+                <div style="font-size: 0.75rem; font-weight: 700; color: var(--accent);">PHASE 4</div>
+                <div style="font-weight: 700; font-size: 0.85rem; color: #9a3412;">Environment Setup</div>
+            </div>
+            <i class="fas fa-chevron-right" style="color: var(--text-light);"></i>
+            <div style="background: var(--accent-subtle); border: 1px solid #fed7aa; padding: 0.75rem 1rem; border-radius: var(--radius-md); text-align: center; flex: 1; min-width: 120px;">
+                <div style="font-size: 0.75rem; font-weight: 700; color: var(--accent);">PHASE 5</div>
+                <div style="font-weight: 700; font-size: 0.85rem; color: #9a3412;">Test Execution</div>
+            </div>
+            <i class="fas fa-chevron-right" style="color: var(--text-light);"></i>
+            <div style="background: var(--warning-subtle); border: 1px solid #fde68a; padding: 0.75rem 1rem; border-radius: var(--radius-md); text-align: center; flex: 1; min-width: 120px;">
+                <div style="font-size: 0.75rem; font-weight: 700; color: var(--warning);">PHASE 6</div>
+                <div style="font-weight: 700; font-size: 0.85rem; color: #92400e;">Defect Logging</div>
+            </div>
+            <i class="fas fa-chevron-right" style="color: var(--text-light);"></i>
+            <div style="background: var(--success-subtle); border: 1px solid #a7f3d0; padding: 0.75rem 1rem; border-radius: var(--radius-md); text-align: center; flex: 1; min-width: 120px;">
+                <div style="font-size: 0.75rem; font-weight: 700; color: var(--success);">PHASE 7</div>
+                <div style="font-weight: 700; font-size: 0.85rem; color: #065f46;">Retesting & Closure</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 12.2: Academic Sample Test Case Execution Matrix -->
+    <div class="card" style="border-radius: var(--radius-xl); padding: 2rem; margin-bottom: 2.5rem;">
+        <h3 style="font-size: 1.35rem; margin-bottom: 0.5rem;"><i class="fas fa-check-double" style="color: var(--success);"></i> 12.2 Test Case Execution Matrix</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Actual results recorded during test suite runs matching project report requirements.</p>
+
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Test ID</th>
+                        <th>Scenario</th>
+                        <th>Expected Output</th>
+                        <th>Actual Output</th>
+                        <th>Result Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="font-weight: 700;">TC-01</td>
+                        <td>Home page load verification</td>
+                        <td>Home page opens with HTTP 200</td>
+                        <td>Home page opens successfully</td>
+                        <td><span class="role-badge adopter" style="background: #dcfce7; color: #15803d;"><i class="fas fa-check"></i> Pass</span></td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 700;">TC-02</td>
+                        <td>Valid credentials authorization</td>
+                        <td>Valid login opens dashboard</td>
+                        <td>Dashboard opens with user role</td>
+                        <td><span class="role-badge adopter" style="background: #dcfce7; color: #15803d;"><i class="fas fa-check"></i> Pass</span></td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 700;">TC-03</td>
+                        <td>Invalid password rejection</td>
+                        <td>Invalid login error displayed</td>
+                        <td>Flash error displayed on login page</td>
+                        <td><span class="role-badge adopter" style="background: #dcfce7; color: #15803d;"><i class="fas fa-check"></i> Pass</span></td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 700;">TC-04</td>
+                        <td>Negative income/adoption fee validation</td>
+                        <td>Negative amount rejected</td>
+                        <td>Validation alert displayed, record blocked</td>
+                        <td><span class="role-badge adopter" style="background: #dcfce7; color: #15803d;"><i class="fas fa-check"></i> Pass (Fixed BUG-001)</span></td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 700;">TC-05</td>
+                        <td>Adoption request reporting</td>
+                        <td>Request appears in report & dashboard</td>
+                        <td>Record displayed in analytics & CSV</td>
+                        <td><span class="role-badge adopter" style="background: #dcfce7; color: #15803d;"><i class="fas fa-check"></i> Pass</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Section 12.3: Defect Registry & Sample Defect Report BUG-001 -->
+    <div class="card" style="border-radius: var(--radius-xl); padding: 2rem;">
+        <h3 style="font-size: 1.35rem; margin-bottom: 0.5rem;"><i class="fas fa-bug" style="color: #ef4444;"></i> 12.3 Defect Tracking Registry</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Official defect logging as required by SET CM41206 practical guidelines.</p>
+
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            {% for defect in defects %}
+                <div style="border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; background: #ffffff; border-left: 5px solid {% if defect.severity == 'High' %}#ef4444{% else %}#f59e0b{% endif %};">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <span style="font-weight: 800; font-family: 'Outfit', sans-serif; font-size: 1.15rem; color: var(--primary);">{{ defect.defect_id }}</span>
+                            <h4 style="font-size: 1.15rem; margin-bottom: 0;">{{ defect.title }}</h4>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <span class="role-badge" style="background: #fee2e2; color: #991b1b;">Severity: {{ defect.severity }}</span>
+                            <span class="role-badge" style="background: #fef3c7; color: #92400e;">Priority: {{ defect.priority }}</span>
+                            <span class="role-badge" style="background: #ecfdf5; color: #047857;"><i class="fas fa-check-circle"></i> {{ defect.status }}</span>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.9rem; margin-bottom: 1rem;">
+                        <div><strong>Module Affected:</strong> {{ defect.module }}</div>
+                        <div><strong>Logged Date:</strong> {{ defect.logged_date }}</div>
+                    </div>
+
+                    <div style="background: var(--bg-surface); padding: 1rem; border-radius: var(--radius-md); font-size: 0.875rem; margin-bottom: 0.75rem;">
+                        <strong>Steps to Reproduce:</strong><br>
+                        {{ defect.steps }}
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.875rem;">
+                        <div style="background: #ecfdf5; padding: 0.75rem; border-radius: var(--radius-sm); color: #065f46;">
+                            <strong>Expected Behavior:</strong><br>
+                            {{ defect.expected }}
+                        </div>
+                        <div style="background: #f8fafc; padding: 0.75rem; border-radius: var(--radius-sm); color: var(--text-main);">
+                            <strong>Actual Behavior / Resolution:</strong><br>
+                            {{ defect.actual }}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Log Defect -->
+<div id="log-defect-modal" class="modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); z-index: 2000; align-items: center; justify-content: center;">
+    <div class="card" style="width: 100%; max-width: 550px; border-radius: var(--radius-xl); padding: 2rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+            <h3 style="font-size: 1.35rem;">Log Defect (Bugzilla / TestRail Format)</h3>
+            <button type="button" onclick="closeModal('log-defect-modal')" style="background: none; border: none; font-size: 1.25rem; cursor: pointer;">&times;</button>
+        </div>
+
+        <form method="POST" action="{{ url_for('log_defect') }}">
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label" for="def-id">Defect ID</label>
+                    <input type="text" name="defect_id" id="def-id" class="form-control" placeholder="BUG-002" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="def-title">Defect Title</label>
+                    <input type="text" name="title" id="def-title" class="form-control" placeholder="Short description of defect" required>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label" for="def-mod">Module</label>
+                    <input type="text" name="module" id="def-mod" class="form-control" value="Adoption Request">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="def-sev">Severity</label>
+                    <select name="severity" id="def-sev" class="form-control">
+                        <option value="Critical">Critical</option>
+                        <option value="High">High</option>
+                        <option value="Medium" selected>Medium</option>
+                        <option value="Low">Low</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="def-pri">Priority</label>
+                    <select name="priority" id="def-pri" class="form-control">
+                        <option value="High">High</option>
+                        <option value="Medium" selected>Medium</option>
+                        <option value="Low">Low</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="def-steps">Steps to Reproduce</label>
+                <textarea name="steps" id="def-steps" class="form-control" rows="2" placeholder="1. Go to page... 2. Click..."></textarea>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label" for="def-exp">Expected</label>
+                    <input type="text" name="expected" id="def-exp" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="def-act">Actual</label>
+                    <input type="text" name="actual" id="def-act" class="form-control">
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('log-defect-modal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Defect</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
